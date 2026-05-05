@@ -23,17 +23,30 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
 
+            - name: Set up Go
+              uses: actions/setup-go@v5
+              with:
+                  go-version: "stable"
+
             - name: Install Fabric AI
               run: |
-                  curl -fsSL https://raw.githubusercontent.com/danielmiessler/Fabric/main/scripts/installer/install.sh | bash
+                  go install github.com/danielmiessler/fabric@v1.4.452
                   echo "$HOME/go/bin" >> "$GITHUB_PATH"
 
             - name: Install pull_request pattern
               run: |
+                  if [ ! -d "sample/pull_request" ]; then
+                    echo "Error: sample/pull_request directory not found" >&2
+                    exit 1
+                  fi
                   mkdir -p "$HOME/.config/fabric/patterns/"
                   cp -R sample/pull_request "$HOME/.config/fabric/patterns/"
 
             - name: Install atpr command
               run: |
+                  if [ ! -f "atpr.sh" ]; then
+                    echo "Error: atpr.sh not found in repository root" >&2
+                    exit 1
+                  fi
                   chmod +x atpr.sh
                   sudo cp atpr.sh /usr/local/bin/atpr
