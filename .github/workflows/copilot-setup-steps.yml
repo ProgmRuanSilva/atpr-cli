@@ -1,0 +1,39 @@
+name: "Copilot Setup Steps"
+
+# Run automatically when this file changes to validate the setup steps,
+# and allow manual testing from the Actions tab.
+on:
+    workflow_dispatch:
+    push:
+        paths:
+            - .github/workflows/copilot-setup-steps.yml
+    pull_request:
+        paths:
+            - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+    # The job MUST be called `copilot-setup-steps` or it will not be picked up by Copilot.
+    copilot-setup-steps:
+        runs-on: ubuntu-latest
+
+        permissions:
+            contents: read
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Install Fabric AI
+              run: |
+                  curl -fsSL https://raw.githubusercontent.com/danielmiessler/Fabric/main/scripts/installer/install.sh | bash
+                  echo "$HOME/go/bin" >> "$GITHUB_PATH"
+
+            - name: Install pull_request pattern
+              run: |
+                  mkdir -p "$HOME/.config/fabric/patterns/"
+                  cp -R sample/pull_request "$HOME/.config/fabric/patterns/"
+
+            - name: Install atpr command
+              run: |
+                  chmod +x atpr.sh
+                  sudo cp atpr.sh /usr/local/bin/atpr
